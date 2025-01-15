@@ -1,18 +1,16 @@
-## 1. ABOUT THE REPOSITORIES
+## 1. ABOUT THIS REPOSITORY
 
-Title: Repositories for A Novel Numerical Method for Agro-Hydrological Modeling of Water Infiltration in Soil
+Title: A Novel Numerical Method for Agro-Hydrological Modeling of Water Infiltration in Soil
 
 Creators: Zeyuan Song and Zheyu Jiang
 
 Organization: School of Chemical Engineering, Oklahoma State University
 
-Description: This repository contains the Python codes and Jupyter Notebook implementation for the 1-D and 3-D case studies presented in our manuscript "A Novel Data-driven Numerical Method for Hydrological Modeling of Water Infiltration in Porous Media", which has been submitted to Chemical Engineering Science for publication. 
-
-Related publication: Song, Z., & Jiang, Z. (2023). A Novel Data-driven Numerical Method for Hydrological Modeling of Water Infiltration in Porous Media. arXiv preprint arXiv:2310.02806.
+Description: This repository contains the Python codes for 1-D through 3-D case studies discussed in the manuscript "A Novel Data-driven Numerical Method for Hydrological Modeling of Water Infiltration in Porous Media", which has been submitted to Chemical Engineering Science journal for consideration for publication. It also contains the datasets used to train the neural networks and Jupyter Notebook implementation for the 1-D case study.
 
 ## 2. TERMS OF USE
 
-This repository is licensed under [https://creativecommons.org/licenses/by/4.0/](https://creativecommons.org/licenses/by-nc-nd/4.0/).
+This repository is licensed under [CC BY 4.0](https://creativecommons.org/licenses/by-nc-nd/4.0/).
 
 ## 3. CONTENTS
 
@@ -26,14 +24,14 @@ File listing
 - GRW_solver.ipynb: a visualization of GRW results presented in Figure 5 of our manuscript
 - DRW_solver.ipynb: a visualization of DRW results presented in Figure 5 of our manuscript
 
-## 4. REFERENCES & ACKNOWLEDGEMENTS
+## 4. REFERENCES & ACKNOWLEDGEMENT
 
 Our DRW idea was inspired by the Global Random Walk concept proposed in:
 1. Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. Global random walk solvers for fully coupled flow and transport in saturated/unsaturated porous media, Advances in Water Resources 152 (2021) 103935.
 2. Suciu, N., 2019. Diffusion in Random Fields: Applications to Transport in Groundwater, Springer.
 
 Credit is also given to the following GitHub repository:
-2. Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. https://github.com/PMFlow/RichardsEquation
+3. Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. https://github.com/PMFlow/RichardsEquation
 
 ## 5. HOW TO CITE US
 
