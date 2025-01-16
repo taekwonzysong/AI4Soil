@@ -39,9 +39,9 @@ def main():
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
 
     # Define parameters
-    num_nodes_x=51
-    num_nodes_y=51
-    num_nodes_z=51
+    num_nodes_x=21
+    num_nodes_y=21
+    num_nodes_z=21
     initial_length=0
     end_length=2
     initial_width=0 
