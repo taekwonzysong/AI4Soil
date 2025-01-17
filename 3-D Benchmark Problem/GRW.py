@@ -1,9 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-It is our in-house developed 3-D GRW solver
-Full credits given to GRW solver originally presented in:
-Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. https://github.com/PMFlow/RichardsEquation Git repository https://doi.org/10.5281/zenodo.4709693
-Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. Global random walk solvers for fully coupled flow and transport in saturated/unsaturated porous media. Advances in Water Resources, 152, 103935
+
 """
 import numpy as np
 import time
