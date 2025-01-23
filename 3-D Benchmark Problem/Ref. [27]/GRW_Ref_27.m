@@ -1,6 +1,3 @@
-%%% Full credits given to GRW solver originally presented in:
-%Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. https://github.com/PMFlow/RichardsEquation Git repository https://doi.org/10.5281/zenodo.4709693
-%Suciu, N., Illiano, D., Prechtel, A., Radu, F. A., 2021. Global random walk solvers for fully coupled flow and transport in saturated/unsaturated porous media. Advances in Water Resources, 152, 103935
 clear
 num_nodes_x=21;
 num_nodes_y=21;
@@ -102,4 +99,23 @@ p1=psi(:,:,17);
 soil_moisture_content1=soil_moisture_content(:,:,17);
 pp1=reshape(new_number_of_particles,1,9261);
 p21=reshape(psi,1,9261);
+% Plot the 3D mesh of p1
+figure;
+mesh(grid_x, grid_y, p1); % Create a 3D mesh plot
+xlabel('$x$', 'Interpreter', 'latex'); % Label for x-axis
+ylabel('$z$', 'Interpreter', 'latex'); % Label for z-axis
+zlabel('$\psi(x,z,t)$', 'Interpreter', 'latex'); % Label for y-axis
+view(115, 15); % Set view angle (azimuth: 115, elevation: 15)
+grid on; % Enable grid
+
+% Plot the contour of soil moisture content
+figure;
+contourf(grid_x, grid_y, soil_moisture_content1, 12); % Filled contour plot with 12 levels
+colormap(flipud(parula)); % Use reversed parula colormap
+colorbar; % Add a colorbar
+xlabel('$x$', 'Interpreter', 'latex'); % Label for x-axis
+ylabel('$z$', 'Interpreter', 'latex'); % Label for z-axis
+title('$\theta(x,z,t)$', 'Interpreter', 'latex'); % Title of the plot
+
+
 
