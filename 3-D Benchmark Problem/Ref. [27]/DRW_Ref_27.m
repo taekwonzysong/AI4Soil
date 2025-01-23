@@ -1,4 +1,4 @@
-%% Run GRW_Ref_27.m first to generate p21 and pp1
+% Run GRW_Ref_27.m first to generate p21 and pp1
 p_new=p21+0.1*randn(1,9261);
 nn_new=pp1+0.1*randn(1,9261);
 data_input=p_new;
