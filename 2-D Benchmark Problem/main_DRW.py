@@ -14,8 +14,8 @@ def main():
     start_time = time.time()
     
     # Load data
-    x, y = load_data1("reference_solutions_2-D.csv")
-    v, w = load_data2("reference_solutions_processed.csv")
+    x, y = load_data1("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
+    v, w = load_data2("2-D Benchmark Problem/Data/reference_solutions_processed.csv")
     
     # Initialize models
     mlp1 = MLP1()

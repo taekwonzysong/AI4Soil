@@ -15,8 +15,8 @@ def main():
     start_time = time.time()
     
     # Load data
-    x, y = load_data1("reference_solutions_1-D_1.csv")
-    v, w = load_data2("reference_solutions_1-D_2.csv")
+    x, y = load_data1("1-D Benchmark Problem/Data/reference_solutions_1-D_1.csv")
+    v, w = load_data2("1-D Benchmark Problem/Data/reference_solutions_1-D_2.csv")
     
     # Initialize models
     mlp1 = MLP1()
@@ -264,7 +264,7 @@ def main():
     print("Coefficient matrix:", A)
     print("Spetral raduis:", spec)
     print("Condition number:", con)
-    ground_truth=np.loadtxt(open("ground_truth_solutions.csv"))
+    ground_truth=np.loadtxt(open("1-D Benchmark Problem/Data/ground_truth_solutions.csv"))
     GRW=np.loadtxt(open("GRW_solutions_s1.csv"))
     grid_gt= np.arange(0,40.1,0.1)
     plt.plot(grid_gt,ground_truth)
