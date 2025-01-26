@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-
 import numpy as np
 import torch
 import time
@@ -16,7 +14,7 @@ def main():
     index=1
     # Set index to 0 if the user wants to generate their own original reference solution for different parameter L and iteration counts:
     # Set index to 1 if the user wants to rerun the instance presented in the manuscript
-    if index == 0:   
+    if index == 0:
         # Parameters for L and S
         L_values = [0.5,1]  # Example range of L
         S_values = [250,500] # Example range of S
@@ -41,34 +39,34 @@ def main():
                 n=n.reshape(num_nodes_x*num_nodes_z,1)
                 psi_solutions_original.append(psi)
                 n_solutions_original.append(n)
-                
+
                 # Add Gaussian noise to both psi and n
                 noisy_psi = psi + np.random.normal(noise_mean, noise_std, psi.shape)
                 noisy_n = n + np.random.normal(noise_mean, noise_std, n.shape)
-                
+
                 # Append to the list
                 psi_solutions.append(noisy_psi)
                 n_solutions.append(noisy_n)
-                
+
         # Convert to PyTorch tensors
         psi_tensor_original = torch.tensor(psi_solutions_original, dtype=torch.float32)
         n_tensor_original = torch.tensor(n_solutions_original, dtype=torch.float32)
         psi_tensor = torch.tensor(psi_solutions, dtype=torch.float32)
         n_tensor = torch.tensor(n_solutions, dtype=torch.float32)
-        
+
         x, y=n_tensor*1e-11, psi_tensor*1e-1
         x = x.reshape(-1, 1)  # or x.view(-1, 1)
         y = y.reshape(-1, 1)  # or y.view(-1, 1)
         # Convert tensors to NumPy arrays
-        psi_array = psi_tensor_original.numpy().flatten()  
-        n_array = n_tensor_original.numpy().flatten()    
+        psi_array = psi_tensor_original.numpy().flatten()
+        n_array = n_tensor_original.numpy().flatten()
         # Save reference solutions to csv, only if you want to save them for later use, not needed for carrying on the calculations
         '''
         df = pd.DataFrame({
             "n": n_array,
             "psi": psi_array
         })
-        
+
         # Save to a CSV file
         csv_filename = "reference_solutions_original.csv"
         df.to_csv(csv_filename, index=False)'''
@@ -88,8 +86,8 @@ def main():
     else:
         # Load data
         print("Loading reference solution data...")
-        x, y = load_data1("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
-        df = pd.read_csv("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
+        x, y = load_data1("reference_solutions_2-D.csv")
+        df = pd.read_csv("reference_solutions_2-D.csv")
         print("Loading reference solution data complete, begin rescaling...")
 
         # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
@@ -113,10 +111,10 @@ def main():
     mlp_optimizer1 = torch.optim.SGD(mlp1.parameters(), lr=1e-3)
     mlp_optimizer2 = torch.optim.SGD(mlp2.parameters(), lr=1e-3)
     mlp_optimizer3 = torch.optim.SGD(mlp3.parameters(), lr=1e-2)
-    
+
     # Train models
     print("NN training...")
-    epoch = 1000
+    epoch = 2
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
@@ -125,9 +123,9 @@ def main():
     num_nodes_x=51
     num_nodes_z=51
     initial_length=0
-    end_length=1 
-    initial_depth=0 
-    end_depth=1 
+    end_length=1
+    initial_depth=0
+    end_depth=1
     dx=(end_length-initial_length)/(num_nodes_x-1)
     #grid_x= np.arange(initial_length,end_length+dx,dx)
     dz=(end_depth-initial_depth)/(num_nodes_z-1)
@@ -180,7 +178,7 @@ def main():
     psi_current=psi
     current_time=0
     while current_time<=Total_time:
-        dt=10 
+        dt=10
         current_time+=dt
         for iteration in range (0,iterations):
             OP=L
@@ -193,15 +191,15 @@ def main():
             for num1 in range(0,num_nodes_x-2):
                  for num2 in range(0,num_nodes_z-1):
                      K_z[num1,num2]=(K[num1+1,num2]+K[num1+1,num2+1])/2
-            
-            
+
+
             for num1 in range(0,num_nodes_x-1):
                 for num2 in range(0,num_nodes_z-2):
                     r_x[num1,num2]=dt*K_x[num1,num2]/np.power(dx,2)/L[num1,num2]
             for num1 in range(0,num_nodes_x-2):
                 for num2 in range(0,num_nodes_z-1):
                     r_z[num1,num2]=dt*K_z[num1,num2]/np.power(dz,2)/L[num1,num2]
-        
+
             residual_coefficients=1-(r_x[0:num_nodes_x-2,:]+r_x[1:num_nodes_x-1,:]+r_z[:,0:num_nodes_z-2]+r_z[:,1:num_nodes_z-1])
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_z-1]=np.multiply(residual_coefficients,n[1:num_nodes_x-1,1:num_nodes_z-1])+\
                np.multiply(r_x[0:num_nodes_x-2,:],n[0:num_nodes_x-2,1:num_nodes_z-1])+np.multiply(r_x[1:num_nodes_x-1,:],n[2:num_nodes_x,1:num_nodes_z-1])+\
@@ -221,10 +219,10 @@ def main():
             flux_residual=mlp3(third_term_init)
             flux_residual=flux_residual.squeeze(1)
             flux_residual=flux_residual.detach().numpy()
-            flux_residual=np.reshape(flux_residual,(num_nodes_x-1,num_nodes_z-1))
+            flux_residual=np.reshape(flux_residual,(num_nodes_x-2,num_nodes_z-2))
             third_term_init=third_term_init.squeeze(1)
             third_term_init=third_term_init.detach().numpy()
-            third_term_init=np.reshape(third_term_init,(num_nodes_x-1,num_nodes_z-1))
+            third_term_init=np.reshape(third_term_init,(num_nodes_x-2,num_nodes_z-2))
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_z-1]=new_number_of_particles[1:num_nodes_x-1,1:num_nodes_z-1]+np.floor(flux_residual)
             n1=new_number_of_particles
             n=n1*1e-11
@@ -243,7 +241,7 @@ def main():
             #psi1=np.expand_dims(np.expand_dims(n, axis=0), axis=-1)
             #psi=model.predict(psi1)[0]
             tol_iteration=np.linalg.norm(psi-psi_current)/np.linalg.norm(psi)
-            
+
             if abs(calculate_K(psi[0,0],K_s,theta_r, theta_s,alpha,n_v,l)*2/L[0,0]-1/(abs((1/(1e-2*psi[0,num_nodes_z-2]))*g[0,num_nodes_z-2]))*(calculate_K(psi[0,num_nodes_z-2],K_s,theta_r, theta_s,alpha,n_v,l)+calculate_K(psi[0,num_nodes_z-3],K_s,theta_r, theta_s,alpha,n_v,l)+h[0,num_nodes_z-2]))>1e-2*dt/dz**2 and iteration>1:
                 current_iteration=iteration
                 #break
@@ -251,11 +249,11 @@ def main():
                 if iteration>=current_iteration:
                     for num in range(1,num_nodes_z-1):
                         L[0,num]=max(L0[0,num],abs((1/(1e-4*psi[0,num]))*g[0,0,num]))
-                
+
             for num in range(1,num_nodes_z-1):
-                g[0,num]=(-(r_z[0,num-1]+r_z[0,num])*n[0,num]+second_term_adjustment[0,num-1]+third_term_init[num-1])*OP[num]/scale/dt
+                g[0,num]=(-(r_z[0,num-1]+r_z[0,num])*n[0,num]+second_term_adjustment[0,num-1]+third_term_init[0,num-1])*OP[0,num]/scale/dt
                 h[0,num]+=calculate_K_prime(psi[0,num],K_s,theta_r, theta_s,alpha,n_v,l)*g[0,num]+calculate_K_prime(psi[0,num-1],K_s,theta_r, theta_s,alpha,n_v,l)*g[0,num-1]
-            if t_num*Total_time/3>=current_time and t_num*Total_time/3<current_time+dt and current_time<=Total_time: 
+            if t_num*Total_time/3>=current_time and t_num*Total_time/3<current_time+dt and current_time<=Total_time:
                 tol_iterations[iteration]=tol_iteration
             if tol_iteration <= tolerance:
                 break
@@ -268,7 +266,7 @@ def main():
                 for num1 in range(0,num_nodes_x):
                     for num2 in range(0,num_nodes_z):
                             soil_moisture_content[num1,num2]=theta(psi[num1,num2],theta_r,theta_s,alpha,n_v)
-        end_time = time.time()
-        print("Total execution time:", end_time - start_time)
+    end_time = time.time()
+    print("Total execution time:", end_time - start_time)
 if __name__ == "__main__":
     main()
