@@ -168,7 +168,7 @@ def GRW_solver(L_value,num_nodes,iterations):
         current_time+=dt
    
     return psi, n
-def main():
+def main(): # if you just want to run main_GRW for a specific L and S
     start_time = time.time()
     L_value=1
     num_nodes=101

@@ -15,7 +15,7 @@ np.seterr(divide='ignore', invalid='ignore')
 from main_GRW import GRW_solver
 def main():
     start_time = time.time()
-    index=0
+    index=1
     # Set index to 0 if the user wants to generate their own original reference solution for different parameter L and iteration counts:
     # Set index to 1 if the user wants to rerun the instance presented in the manuscript
     if index==0:   
@@ -35,6 +35,7 @@ def main():
 
         for L in L_values:
             for S in S_values:
+                print("Currently starting L = ", L, " and S = ", S)
                 # Generate solution
                 psi, n = GRW_solver(L,num_nodes, S)
                 psi_solutions_original.append(psi)
@@ -62,6 +63,7 @@ def main():
         n_array = n_tensor_original.numpy().flatten()     # Flatten if needed
         
         # Create a DataFrame with two columns
+        '''
         df = pd.DataFrame({
             "n": n_array,
             "psi": psi_array
@@ -69,7 +71,7 @@ def main():
         
         # Save to a CSV file
         csv_filename = "reference_solutions_original.csv"
-        df.to_csv(csv_filename, index=False)
+        df.to_csv(csv_filename, index=False)'''
 
         # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
         # Rescaling is needed to compute f^{-1}(J) using NN trained on psi because 1) psi can only take negative values whereas J (in Equation 21) can be either positive or negative; 2) the range of psi is different from that of J
@@ -83,10 +85,12 @@ def main():
         w = w.reshape(-1, 1)  # or w.view(-1, 1)
     else:
         # Load data
-        x, y = load_data1("Data/reference_solutions_1-D_1.csv")
-        df = pd.read_csv("Data/reference_solutions_1-D_1.csv")
+        print("Loading reference solution data")
+        x, y = load_data1("1-D Benchmark Problem/Data/reference_solutions_1-D_1.csv")
+        df = pd.read_csv("1-D Benchmark Problem/Data/reference_solutions_1-D_1.csv")
         # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
         # Rescaling is needed to compute f^{-1}(J) using NN trained on psi because 1) psi can only take negative values whereas J (in Equation 21) can be either positive or negative; 2) the range of psi is different from that of J
+        print("Begin rescaling...")
         new_min, new_max = -10, 10
         df['x'] = ((df.iloc[:, 0] - df.iloc[:, 0].min()) / (df.iloc[:, 0].max() - df.iloc[:, 0].min())) * (new_max - new_min) + new_min
         new_min2, new_max2 = -10e10, 10e10
@@ -94,6 +98,7 @@ def main():
         # Store renormalized x, y as tensor v, w
         v = torch.tensor(df['x'].values, dtype=torch.float32).view(-1, 1)
         w = torch.tensor(df['y'].values, dtype=torch.float32).view(-1, 1)
+        print("Rescaling complete.")
     
     # Initialize models
     mlp1 = MLP1()
@@ -106,6 +111,7 @@ def main():
     mlp_optimizer3 = torch.optim.SGD(mlp3.parameters(), lr=1e-2)
     
     # Train models
+    print("NN training...")
     epoch = 1000
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
@@ -341,8 +347,8 @@ def main():
     print("Coefficient matrix:", A)
     print("Spetral raduis:", spec)
     print("Condition number:", con)
-    ground_truth=np.loadtxt(open("Data/ground_truth_solutions.csv"))
-    GRW=np.loadtxt(open("Data/GRW_solutions_s1.csv"))
+    ground_truth=np.loadtxt(open("1-D Benchmark Problem/Data/ground_truth_solutions.csv"))
+    GRW=np.loadtxt(open("1-D Benchmark Problem/Data/GRW_solutions_s1.csv"))
     grid_gt= np.arange(0,40.1,0.1)
     plt.plot(grid_gt,ground_truth)
     plt.plot(grid_z,GRW)

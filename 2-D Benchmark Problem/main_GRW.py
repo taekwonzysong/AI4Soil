@@ -7,10 +7,7 @@ import time
 import os
 from correlations import theta, calculate_K
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
-def main():
-    start_time = time.time()
-    num_nodes_x=51
-    num_nodes_z=51
+def GRW_solver(L_value,num_nodes_x,num_nodes_z,iterations):
     initial_length=0
     end_length=1 
     initial_depth=0 
@@ -25,7 +22,6 @@ def main():
     alpha=3.6
     n_v=1.56
     Total_time = 1.26*1e4
-    iterations= 500
     number_of_praticles=1e10
     tolerance=1e-5
     l=0.5
@@ -42,7 +38,7 @@ def main():
         for num2 in range(0,num_nodes_z):
                 soil_moisture_content[num1,num2]=theta(psi[num1,num2],theta_r,theta_s,alpha,n_v)
     soil_moisture_content_0=soil_moisture_content
-    L=0.5*np.ones((num_nodes_x,num_nodes_z))
+    L=L_value*np.ones((num_nodes_x,num_nodes_z))
     residual_coefficients=np.ones((num_nodes_x-2,num_nodes_z-2))
     r_x=np.zeros((num_nodes_x-1,num_nodes_z-2))
     r_z=np.zeros((num_nodes_x-2,num_nodes_z-1))
@@ -103,7 +99,16 @@ def main():
                 for num1 in range(0,num_nodes_x):
                     for num2 in range(0,num_nodes_z):
                             soil_moisture_content[num1,num2]=theta(psi[num1,num2],theta_r,theta_s,alpha,n_v)
-        end_time = time.time()
-        print("Total execution time:", end_time - start_time)
+    return psi,new_number_of_particles
+
+def main(): # if you just want to run main_GRW.py for a specific L and S
+    start_time = time.time()
+    L_value=0.5
+    num_nodes_x=51
+    num_nodes_z=51
+    iterations=500
+    psi, n=GRW_solver(L_value,num_nodes_x,num_nodes_z,iterations)
+    end_time = time.time()
+    print("Total execution time:", end_time - start_time)
 if __name__ == "__main__":
     main()

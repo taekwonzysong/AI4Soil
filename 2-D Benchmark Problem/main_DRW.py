@@ -4,19 +4,106 @@ import numpy as np
 import torch
 import time
 import os
+import pandas as pd
 from models import MLP1, MLP2, NN
 from data_processing import load_data1, load_data2
 from training import train_model
 from correlations import theta, calculate_K, calculate_K_prime
+from main_GRW import GRW_solver
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 def main():
     start_time = time.time()
-    start_time = time.time()
-    
-    # Load data
-    x, y = load_data1("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
-    v, w = load_data2("2-D Benchmark Problem/Data/reference_solutions_processed.csv")
-    
+    index=1
+    # Set index to 0 if the user wants to generate their own original reference solution for different parameter L and iteration counts:
+    # Set index to 1 if the user wants to rerun the instance presented in the manuscript
+    if index == 0:   
+        # Parameters for L and S
+        L_values = [0.5,1]  # Example range of L
+        S_values = [250,500] # Example range of S
+        num_nodes_x=51
+        num_nodes_z=51
+        # Gaussian noise parameters
+        noise_mean = 0.0
+        noise_std = 0.05
+
+        # Collecting numerical solutions
+        psi_solutions = []
+        n_solutions = []
+        psi_solutions_original = []
+        n_solutions_original  = []
+
+        for L in L_values:
+            for S in S_values:
+                # Generate solution
+                print("Currently starting L = ", L, " and S = ", S)
+                psi, n = GRW_solver(L,num_nodes_x,num_nodes_z,S)
+                psi=psi.reshape(num_nodes_x*num_nodes_z,1)
+                n=n.reshape(num_nodes_x*num_nodes_z,1)
+                psi_solutions_original.append(psi)
+                n_solutions_original.append(n)
+                
+                # Add Gaussian noise to both psi and n
+                noisy_psi = psi + np.random.normal(noise_mean, noise_std, psi.shape)
+                noisy_n = n + np.random.normal(noise_mean, noise_std, n.shape)
+                
+                # Append to the list
+                psi_solutions.append(noisy_psi)
+                n_solutions.append(noisy_n)
+                
+        # Convert to PyTorch tensors
+        psi_tensor_original = torch.tensor(psi_solutions_original, dtype=torch.float32)
+        n_tensor_original = torch.tensor(n_solutions_original, dtype=torch.float32)
+        psi_tensor = torch.tensor(psi_solutions, dtype=torch.float32)
+        n_tensor = torch.tensor(n_solutions, dtype=torch.float32)
+        
+        x, y=n_tensor*1e-11, psi_tensor*1e-1
+        x = x.reshape(-1, 1)  # or x.view(-1, 1)
+        y = y.reshape(-1, 1)  # or y.view(-1, 1)
+        # Convert tensors to NumPy arrays
+        psi_array = psi_tensor_original.numpy().flatten()  
+        n_array = n_tensor_original.numpy().flatten()    
+        # Save reference solutions to csv, only if you want to save them for later use, not needed for carrying on the calculations
+        '''
+        df = pd.DataFrame({
+            "n": n_array,
+            "psi": psi_array
+        })
+        
+        # Save to a CSV file
+        csv_filename = "reference_solutions_original.csv"
+        df.to_csv(csv_filename, index=False)'''
+
+        # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
+        # Rescaling is needed to compute f^{-1}(J) using NN trained on psi because 1) psi can only take negative values whereas J (in Equation 21) can be either positive or negative; 2) the range of psi is different from that of J
+        print("Begin rescaling...")
+        new_min, new_max = -10, 10
+        psi_min, psi_max = psi_tensor.min(), psi_tensor.max()
+        v = (psi_tensor - psi_min) / (psi_max - psi_min) * (new_max - new_min) + new_min
+        new_min2, new_max2 = -10e10, 10e10
+        n_min, n_max = n_tensor.min(), n_tensor.max()
+        w = (n_tensor - n_min) / (n_max - n_min) * (new_max2 - new_min2) + new_min2
+        v = v.reshape(-1, 1)  # or v.view(-1, 1)
+        w = w.reshape(-1, 1)  # or w.view(-1, 1)
+        print("Rescaling complete.")
+    else:
+        # Load data
+        print("Loading reference solution data...")
+        x, y = load_data1("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
+        df = pd.read_csv("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
+        print("Loading reference solution data complete, begin rescaling...")
+
+        # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
+        # Rescaling is needed to compute f^{-1}(J) using NN trained on psi because 1) psi can only take negative values whereas J (in Equation 21) can be either positive or negative; 2) the range of psi is different from that of J
+        print("Begin rescaling...")
+        new_min, new_max = -10, 10
+        df['x'] = ((df.iloc[:, 0] - df.iloc[:, 0].min()) / (df.iloc[:, 0].max() - df.iloc[:, 0].min())) * (new_max - new_min) + new_min
+        new_min2, new_max2 = -10e10, 10e10
+        df['y'] = ((df.iloc[:, 1] - df.iloc[:, 1].min()) / (df.iloc[:, 1].max() - df.iloc[:, 1].min())) * (new_max2 - new_min2) + new_min2
+        # Store renormalized x, y as tensor v, w
+        v = torch.tensor(df['x'].values, dtype=torch.float32).view(-1, 1)
+        w = torch.tensor(df['y'].values, dtype=torch.float32).view(-1, 1)
+        print("Rescaling complete.")
+
     # Initialize models
     mlp1 = MLP1()
     mlp2 = MLP2()
@@ -28,10 +115,12 @@ def main():
     mlp_optimizer3 = torch.optim.SGD(mlp3.parameters(), lr=1e-2)
     
     # Train models
+    print("NN training...")
     epoch = 1000
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
+    print("training complete.")
 
     num_nodes_x=51
     num_nodes_z=51
@@ -128,14 +217,14 @@ def main():
             third_term_init=(r_z[:,1:num_nodes_z-1]-r_z[:,0:num_nodes_z-2])*dz +soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_z-1]
             third_term_init=np.reshape(third_term_init,(num_nodes_x-1*num_nodes_z-1))
             third_term_init=torch.FloatTensor(third_term_init)
-            third_term_initi=third_term_init.unsqueeze(1)
+            third_term_init=third_term_init.unsqueeze(1)
             flux_residual=mlp3(third_term_init)
             flux_residual=flux_residual.squeeze(1)
             flux_residual=flux_residual.detach().numpy()
             flux_residual=np.reshape(flux_residual,(num_nodes_x-1,num_nodes_z-1))
-            third_term_initi=third_term_initi.squeeze(1)
-            third_term_initi=third_term_initi.detach().numpy()
-            third_term_initi=np.reshape(third_term_initi,(num_nodes_x-1,num_nodes_z-1))
+            third_term_init=third_term_init.squeeze(1)
+            third_term_init=third_term_init.detach().numpy()
+            third_term_init=np.reshape(third_term_init,(num_nodes_x-1,num_nodes_z-1))
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_z-1]=new_number_of_particles[1:num_nodes_x-1,1:num_nodes_z-1]+np.floor(flux_residual)
             n1=new_number_of_particles
             n=n1*1e-11

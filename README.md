@@ -38,7 +38,7 @@ Under the 2-D Benchmark Problem folder:
 - models.py: defines the neural network architectures
 - training.py: function to train the neural networks
 - data_processing.py: function to load the data
-- Data/reference_solutions_2-D.csv: reference solutions after performing data augmentation and will be used for neural network training
+- Data/reference_solutions_2-D.csv: reference solutions after performing data augmentation and will be used for neural network training saved for the particular instance discussed in our manuscript
  
 Under the 3-D Benchmark Problem folder:
 - main_GRW.py: main file for running the GRW algorithm
@@ -47,7 +47,7 @@ Under the 3-D Benchmark Problem folder:
 - models.py: defines the neural network architectures
 - training.py: function to train the neural networks
 - data_processing.py: function to load the data
-- Data/reference_solutions_2-D.csv: reference solutions after performing data augmentation and will be used for neural network training
+- Data/reference_solutions_3-D.csv: reference solutions after performing data augmentation and will be used for neural network training saved for the particular instance discussed in our manuscript
  
 Under the Ref. [27] folder:
 - GRW_Ref_27.m: runs the in-house GRW algorithm (this needs to be run first) for Ref. [27] in our manuscript
