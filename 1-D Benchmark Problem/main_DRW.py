@@ -3,6 +3,7 @@ import numpy as np
 import torch
 import time
 import os
+import pandas as pd
 import matplotlib.pyplot as plt
 from models import MLP1, MLP2, NN
 from data_processing import load_data1, load_data2
@@ -11,12 +12,93 @@ from correlations import theta, calculate_K, calculate_K_prime
 from matrix import spetral_raduis, C, condition_number
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 np.seterr(divide='ignore', invalid='ignore')
+from main_GRW import GRW_solver
 def main():
     start_time = time.time()
-    
-    # Load data
-    x, y = load_data1("1-D Benchmark Problem/Data/reference_solutions_1-D_1.csv")
-    v, w = load_data2("1-D Benchmark Problem/Data/reference_solutions_1-D_2.csv")
+    index=1
+    # Set index to 0 if the user wants to generate their own original reference solution for different parameter L and iteration counts:
+    # Set index to 1 if the user wants to rerun the instance presented in the manuscript
+    if index==0:   
+        # Parameters for L and S
+        L_values = [0.5, 1, 5, 10, 15]  # Example range of L
+        S_values = np.arange(60, 19681, 60)  # Example range of S
+        num_nodes=41
+        # Gaussian noise parameters
+        noise_mean = 0.0
+        noise_std = 0.05
+
+        # Collecting numerical solutions
+        psi_solutions = []
+        n_solutions = []
+        psi_solutions_original = []
+        n_solutions_original  = []
+
+        for L in L_values:
+            for S in S_values:
+                print("Currently starting L = ", L, " and S = ", S)
+                # Generate solution
+                psi, n = GRW_solver(L,num_nodes, S)
+                psi_solutions_original.append(psi)
+                n_solutions_original.append(n)
+                
+                # Add Gaussian noise to both psi and n
+                noisy_psi = psi + np.random.normal(noise_mean, noise_std, psi.shape)
+                noisy_n = n + np.random.normal(noise_mean, noise_std, n.shape)
+                
+                # Append to the list
+                psi_solutions.append(noisy_psi)
+                n_solutions.append(noisy_n)
+                
+        # Convert to PyTorch tensors
+        psi_tensor_original = torch.tensor(psi_solutions_original, dtype=torch.float32)
+        n_tensor_original = torch.tensor(n_solutions_original, dtype=torch.float32)
+        psi_tensor = torch.tensor(psi_solutions, dtype=torch.float32)
+        n_tensor = torch.tensor(n_solutions, dtype=torch.float32)
+        
+        x, y=n_tensor*1e-11, psi_tensor*1e-1
+        x = x.reshape(-1, 1)  # or x.view(-1, 1)
+        y = y.reshape(-1, 1)  # or y.view(-1, 1)
+        # Convert tensors to NumPy arrays
+        psi_array = psi_tensor_original.numpy().flatten()  # Flatten if needed
+        n_array = n_tensor_original.numpy().flatten()     # Flatten if needed
+        
+        # Create a DataFrame with two columns
+        '''
+        df = pd.DataFrame({
+            "n": n_array,
+            "psi": psi_array
+        })
+        
+        # Save to a CSV file
+        csv_filename = "reference_solutions_original.csv"
+        df.to_csv(csv_filename, index=False)'''
+
+        # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
+        # Rescaling is needed to compute f^{-1}(J) using NN trained on psi because 1) psi can only take negative values whereas J (in Equation 21) can be either positive or negative; 2) the range of psi is different from that of J
+        new_min, new_max = -10, 10
+        psi_min, psi_max = psi_tensor.min(), psi_tensor.max()
+        v = (psi_tensor - psi_min) / (psi_max - psi_min) * (new_max - new_min) + new_min
+        new_min2, new_max2 = -10e10, 10e10
+        n_min, n_max = n_tensor.min(), n_tensor.max()
+        w = (n_tensor - n_min) / (n_max - n_min) * (new_max2 - new_min2) + new_min2
+        v = v.reshape(-1, 1)  # or v.view(-1, 1)
+        w = w.reshape(-1, 1)  # or w.view(-1, 1)
+    else:
+        # Load data
+        print("Loading reference solution data")
+        x, y = load_data1("1-D Benchmark Problem/Data/reference_solutions_1-D_1.csv")
+        df = pd.read_csv("1-D Benchmark Problem/Data/reference_solutions_1-D_1.csv")
+        # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
+        # Rescaling is needed to compute f^{-1}(J) using NN trained on psi because 1) psi can only take negative values whereas J (in Equation 21) can be either positive or negative; 2) the range of psi is different from that of J
+        print("Begin rescaling...")
+        new_min, new_max = -10, 10
+        df['x'] = ((df.iloc[:, 0] - df.iloc[:, 0].min()) / (df.iloc[:, 0].max() - df.iloc[:, 0].min())) * (new_max - new_min) + new_min
+        new_min2, new_max2 = -10e10, 10e10
+        df['y'] = ((df.iloc[:, 1] - df.iloc[:, 1].min()) / (df.iloc[:, 1].max() - df.iloc[:, 1].min())) * (new_max2 - new_min2) + new_min2
+        # Store renormalized x, y as tensor v, w
+        v = torch.tensor(df['x'].values, dtype=torch.float32).view(-1, 1)
+        w = torch.tensor(df['y'].values, dtype=torch.float32).view(-1, 1)
+        print("Rescaling complete.")
     
     # Initialize models
     mlp1 = MLP1()
@@ -29,13 +111,15 @@ def main():
     mlp_optimizer3 = torch.optim.SGD(mlp3.parameters(), lr=1e-2)
     
     # Train models
+    print("NN training...")
     epoch = 1000
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
     end_train=time.time()
-    print("Training time:", end_train - start_time)
-    
+    print("Training complete. Training time:", end_train - start_time)
+
+    print("Begin solution process...")
     # Define parameters
     Total_time=360
     K_s=9.44e-03
@@ -68,7 +152,7 @@ def main():
     # Map psi_0 to n_0 by neural networks
     ##########################################################################################
     
-    n0=mlp2(psi_0);
+    n0=mlp2(psi_0)
     n0=n0.squeeze(1)
     n0=n0.detach().numpy()
     n0=scale*(10*n0)
@@ -76,7 +160,7 @@ def main():
     psi_0=psi_0.squeeze(1)
     psi_0=psi_0.detach().numpy()
     soil_moisture_content= np.ones(num_nodes)
-    n=n0;
+    n=n0
     L=1*np.ones(num_nodes)
     L0=L
     init_num_particles=n[0]
@@ -108,11 +192,11 @@ def main():
     while current_time<=Total_time:
         for num in range(0,num_nodes-1):
             K[num]=calculate_K(psi[num],K_s,A,gama)
-            #dt=1;
-            dt=(np.power(dz,2)*maxr)/(2*max(K));
+            #dt=1
+            dt=(np.power(dz,2)*maxr)/(2*max(K))
        
         
-        tol_iterations=np.zeros(iterations);
+        tol_iterations=np.zeros(iterations)
         for iteration in range(0,iterations):
             OP=L
             for num in range(0,num_nodes-1):
@@ -135,7 +219,7 @@ def main():
         
             for num in range(1,num_nodes):
                 first_term[num]=residual_coefficients[num]*n[num]#+restr[num-1]
-                first_term[0]=residual_coefficients[0]*n[0];
+                first_term[0]=residual_coefficients[0]*n[0]
             first_term_adjustment=np.floor(first_term)
             new_number_of_particles=first_term_adjustment
             saturation_adjustment=n-new_number_of_particles
@@ -152,9 +236,9 @@ def main():
             second_term_adjustment=np.floor(second_term) 
             for num in range(0,num_nodes-2):
                 new_number_of_particles[num] +=second_term_adjustment[num]
-                new_number_of_particles[num+2]=new_number_of_particles[num+2]+saturation_adjustment[num+1]-second_term_adjustment[num];
+                new_number_of_particles[num+2]=new_number_of_particles[num+2]+saturation_adjustment[num+1]-second_term_adjustment[num]
             boundary_residual_end=r[num_nodes-2]*n[num_nodes-1]+boundary_residual_end 
-            end_saturation_adjustment=np.floor(boundary_residual_end); 
+            end_saturation_adjustment=np.floor(boundary_residual_end)
             boundary_residual_end=boundary_residual_end-end_saturation_adjustment
             new_number_of_particles[num_nodes-2]=new_number_of_particles[num_nodes-2]+end_saturation_adjustment 
             new_number_of_particles[0]=init_num_particles
@@ -194,7 +278,7 @@ def main():
             n=n1*1e-11
             n=torch.FloatTensor(n)
             n=n.unsqueeze(1)
-            psi=mlp1(n);
+            psi=mlp1(n)
             psi=psi.squeeze(1)
             psi=psi.detach().numpy()
             psi=psi*10
@@ -227,7 +311,7 @@ def main():
                 break  
             for num in range(0,num_nodes):
                 soil_moisture_content[num]=theta(psi[num],K_s,theta_r,theta_s,alpha,beta)      
-            psi_current=psi;
+            psi_current=psi
             if  t_num*0.2*Total_time>=current_time and t_num*0.2*Total_time<current_time+dt: 
                 t_num+=1
             for num in range(0,num_nodes):
@@ -238,7 +322,7 @@ def main():
         c+=1
         current_time+=dt
     end_time = time.time()
-    print("Total execution time:", end_time - start_time)
+    print("Solution process complete. Total execution time: ", end_time - start_time)
     
     ########################################################################
     # Construct the coefficient matrix A
@@ -265,13 +349,13 @@ def main():
     print("Spetral raduis:", spec)
     print("Condition number:", con)
     ground_truth=np.loadtxt(open("1-D Benchmark Problem/Data/ground_truth_solutions.csv"))
-    GRW=np.loadtxt(open("GRW_solutions_s1.csv"))
+    GRW=np.loadtxt(open("1-D Benchmark Problem/Data/GRW_solutions_s1.csv"))
     grid_gt= np.arange(0,40.1,0.1)
     plt.plot(grid_gt,ground_truth)
     plt.plot(grid_z,GRW)
     plt.plot(grid_z,psi)
     plt.legend(['ground truth solutions','GRW','DRW'], loc='upper left')
-    plt.show
+    plt.show # use PyCharm, Spyder, or Jupyter notebook for plotting
    
 if __name__ == "__main__":
     main()

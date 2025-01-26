@@ -1,5 +1,5 @@
-function [tht]=theta_GM(theta_res,theta_sat,c,alpha,nGM,ng)
-           
+function [tht]=theta_GM(theta_res,theta_sat,c,alpha,nGM,ng) % van Genuchten-Mualem water retention curve 
+
 theta_neg = theta_res+(theta_sat-theta_res)*(1./(1+(-alpha*c).^nGM)).^ng;
 theta_pos = theta_sat;
 neg = c < 0; 
