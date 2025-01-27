@@ -190,6 +190,7 @@ def main():
 
     # Simulation starts here:
     while current_time<=Total_time:
+        print("Solving for t = ",current_time)
         for num in range(0,num_nodes-1):
             K[num]=calculate_K(psi[num],K_s,A,gama)
             #dt=1
@@ -322,7 +323,7 @@ def main():
         c+=1
         current_time+=dt
     end_time = time.time()
-    print("Solution process complete. Total execution time: ", end_time - start_time)
+    print("Solution process complete. Total CPU time: ", end_time - start_time)
     
     ########################################################################
     # Construct the coefficient matrix A
@@ -355,7 +356,7 @@ def main():
     plt.plot(grid_z,GRW)
     plt.plot(grid_z,psi)
     plt.legend(['ground truth solutions','GRW','DRW'], loc='upper left')
-    plt.show # use PyCharm, Spyder, or Jupyter notebook for plotting
+    plt.show # use PyCharm, Spyder, or Jupyter notebook for plotting, VS Code does not work for some reason
    
 if __name__ == "__main__":
     main()

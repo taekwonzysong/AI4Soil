@@ -325,7 +325,9 @@ def main():
     L0=L
     current_time=0
     K=np.zeros((num_nodes_x,num_nodes_y,num_nodes_z))
+
     while current_time<=Total_time:
+        print("Solving for t =", current_time)
         for iteration in range (0,iterations):
             OP=L
             for num1 in range(0,num_nodes_x):
@@ -448,7 +450,7 @@ def main():
                         soil_moisture_content[num1,num2,num3]=theta(psi[num1,num2,num3],theta_r,theta_s,alpha)
             current_time+=dt
         end_time = time.time()
-        print("Solution process complete. Total execution time:", end_time - start_time)
+        print("Solution process complete. Total CPU time:", end_time - start_time)
     
 if __name__ == "__main__":
     main()
