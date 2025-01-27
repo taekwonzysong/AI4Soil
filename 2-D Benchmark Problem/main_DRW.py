@@ -177,9 +177,10 @@ def main():
     tol_iterations=np.zeros(iterations)
     psi_current=psi
     current_time=0
+    dt = 10
     while current_time<=Total_time:
-        dt=10
         current_time+=dt
+        print("Solving for t = ",current_time)
         for iteration in range (0,iterations):
             OP=L
             for num1 in range(0,num_nodes_x):
@@ -267,6 +268,6 @@ def main():
                     for num2 in range(0,num_nodes_z):
                             soil_moisture_content[num1,num2]=theta(psi[num1,num2],theta_r,theta_s,alpha,n_v)
     end_time = time.time()
-    print("Solution process complete. Total execution time: ", end_time - start_time)
+    print("Solution process complete. Total CPU time: ", end_time - start_time)
 if __name__ == "__main__":
     main()
