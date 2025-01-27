@@ -120,11 +120,11 @@ def main():
     
     print("NN training...")
     # Train models
-    epoch = 1000
+    epoch = 2
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
-    print("NN training complete")
+    print("NN training complete, begin solution process...")
 
     # Define parameters
     num_nodes_x=21
@@ -251,19 +251,19 @@ def main():
             new_number_of_particles[:,:,num_nodes_z-1]=h_r*scale
             new_number_of_particles[:,num_nodes_y-1,:]=psi_0[:,num_nodes_y-1,:]*scale
             
-            soil_moisture_content_diff=(soil_moisture_content0-soil_moisture_content)/L;
+            soil_moisture_content_diff=(soil_moisture_content0-soil_moisture_content)/L
             third_term_init=(r_z[:,:,1:num_nodes_z-1]-r_z[:,:,0:num_nodes_z-2])*dz + soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]
             
             third_term_init=np.reshape(third_term_init,(num_nodes_x-1*num_nodes_y-1*num_nodes_z-1))
             third_term_init=torch.FloatTensor(third_term_init)
-            third_term_initi=third_term_init.unsqueeze(1)
+            third_term_init=third_term_init.unsqueeze(1)
             flux_residual=mlp3(third_term_init)
             flux_residual=flux_residual.squeeze(1)
             flux_residual=flux_residual.detach().numpy()
             flux_residual=np.reshape(flux_residual,(num_nodes_x-1,num_nodes_y-1,num_nodes_z-1))
-            third_term_initi=third_term_initi.squeeze(1)
-            third_term_initi=third_term_initi.detach().numpy()
-            third_term_initi=np.reshape(third_term_initi,(num_nodes_x-1,num_nodes_y-1,num_nodes_z-1))
+            third_term_init=third_term_init.squeeze(1)
+            third_term_init=third_term_init.detach().numpy()
+            third_term_init=np.reshape(third_term_init,(num_nodes_x-1,num_nodes_y-1,num_nodes_z-1))
             
         ######################################################################################
         # Map n^(s+1) to psi^(s+1) by neural network
@@ -314,7 +314,7 @@ def main():
                         soil_moisture_content[num1,num2,num3]=theta(psi[num1,num2,num3],theta_r,theta_s,alpha)
             current_time+=dt
             end_time = time.time()
-            print("Total execution time:", end_time - start_time)
+            print("Solution process complete. Total execution time:", end_time - start_time)
     
     if __name__ == "__main__":
         main()

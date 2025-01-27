@@ -117,8 +117,9 @@ def main():
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
     end_train=time.time()
-    print("Training time:", end_train - start_time)
-    
+    print("Training complete. Training time:", end_train - start_time)
+
+    print("Begin solution process...")
     # Define parameters
     Total_time=360
     K_s=9.44e-03
@@ -151,7 +152,7 @@ def main():
     # Map psi_0 to n_0 by neural networks
     ##########################################################################################
     
-    n0=mlp2(psi_0);
+    n0=mlp2(psi_0)
     n0=n0.squeeze(1)
     n0=n0.detach().numpy()
     n0=scale*(10*n0)
@@ -159,7 +160,7 @@ def main():
     psi_0=psi_0.squeeze(1)
     psi_0=psi_0.detach().numpy()
     soil_moisture_content= np.ones(num_nodes)
-    n=n0;
+    n=n0
     L=1*np.ones(num_nodes)
     L0=L
     init_num_particles=n[0]
@@ -191,11 +192,11 @@ def main():
     while current_time<=Total_time:
         for num in range(0,num_nodes-1):
             K[num]=calculate_K(psi[num],K_s,A,gama)
-            #dt=1;
-            dt=(np.power(dz,2)*maxr)/(2*max(K));
+            #dt=1
+            dt=(np.power(dz,2)*maxr)/(2*max(K))
        
         
-        tol_iterations=np.zeros(iterations);
+        tol_iterations=np.zeros(iterations)
         for iteration in range(0,iterations):
             OP=L
             for num in range(0,num_nodes-1):
@@ -218,7 +219,7 @@ def main():
         
             for num in range(1,num_nodes):
                 first_term[num]=residual_coefficients[num]*n[num]#+restr[num-1]
-                first_term[0]=residual_coefficients[0]*n[0];
+                first_term[0]=residual_coefficients[0]*n[0]
             first_term_adjustment=np.floor(first_term)
             new_number_of_particles=first_term_adjustment
             saturation_adjustment=n-new_number_of_particles
@@ -235,9 +236,9 @@ def main():
             second_term_adjustment=np.floor(second_term) 
             for num in range(0,num_nodes-2):
                 new_number_of_particles[num] +=second_term_adjustment[num]
-                new_number_of_particles[num+2]=new_number_of_particles[num+2]+saturation_adjustment[num+1]-second_term_adjustment[num];
+                new_number_of_particles[num+2]=new_number_of_particles[num+2]+saturation_adjustment[num+1]-second_term_adjustment[num]
             boundary_residual_end=r[num_nodes-2]*n[num_nodes-1]+boundary_residual_end 
-            end_saturation_adjustment=np.floor(boundary_residual_end); 
+            end_saturation_adjustment=np.floor(boundary_residual_end)
             boundary_residual_end=boundary_residual_end-end_saturation_adjustment
             new_number_of_particles[num_nodes-2]=new_number_of_particles[num_nodes-2]+end_saturation_adjustment 
             new_number_of_particles[0]=init_num_particles
@@ -277,7 +278,7 @@ def main():
             n=n1*1e-11
             n=torch.FloatTensor(n)
             n=n.unsqueeze(1)
-            psi=mlp1(n);
+            psi=mlp1(n)
             psi=psi.squeeze(1)
             psi=psi.detach().numpy()
             psi=psi*10
@@ -310,7 +311,7 @@ def main():
                 break  
             for num in range(0,num_nodes):
                 soil_moisture_content[num]=theta(psi[num],K_s,theta_r,theta_s,alpha,beta)      
-            psi_current=psi;
+            psi_current=psi
             if  t_num*0.2*Total_time>=current_time and t_num*0.2*Total_time<current_time+dt: 
                 t_num+=1
             for num in range(0,num_nodes):
@@ -321,7 +322,7 @@ def main():
         c+=1
         current_time+=dt
     end_time = time.time()
-    print("Total execution time:", end_time - start_time)
+    print("Solution process complete. Total execution time: ", end_time - start_time)
     
     ########################################################################
     # Construct the coefficient matrix A

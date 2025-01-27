@@ -86,8 +86,8 @@ def main():
     else:
         # Load data
         print("Loading reference solution data...")
-        x, y = load_data1("reference_solutions_2-D.csv")
-        df = pd.read_csv("reference_solutions_2-D.csv")
+        x, y = load_data1("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
+        df = pd.read_csv("2-D Benchmark Problem/Data/reference_solutions_2-D.csv")
         print("Loading reference solution data complete, begin rescaling...")
 
         # Rescaling data x, y to [-10,10] and [-10*10^10, 10*10^10], respectively
@@ -114,11 +114,11 @@ def main():
 
     # Train models
     print("NN training...")
-    epoch = 2
+    epoch = 1000
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
-    print("training complete.")
+    print("training complete. Begin solution process...")
 
     num_nodes_x=51
     num_nodes_z=51
@@ -267,6 +267,6 @@ def main():
                     for num2 in range(0,num_nodes_z):
                             soil_moisture_content[num1,num2]=theta(psi[num1,num2],theta_r,theta_s,alpha,n_v)
     end_time = time.time()
-    print("Total execution time:", end_time - start_time)
+    print("Solution process complete. Total execution time: ", end_time - start_time)
 if __name__ == "__main__":
     main()

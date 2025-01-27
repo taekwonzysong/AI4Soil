@@ -114,7 +114,7 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             new_number_of_particles[:,:,num_nodes_z-1]=h_r*number_of_particles
             new_number_of_particles[:,num_nodes_y-1,:]=psi_0[:,num_nodes_y-1,:]*number_of_particles
             
-            soil_moisture_content_diff=(soil_moisture_content0-soil_moisture_content)/L;
+            soil_moisture_content_diff=(soil_moisture_content0-soil_moisture_content)/L
             third_term_init=(r_z[:,:,1:num_nodes_z-1]-r_z[:,:,0:num_nodes_z-2])*dz + soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]
             flux_residual=third_term_init*number_of_particles
             
@@ -257,7 +257,7 @@ while current_time<=Total_time:
         new_number_of_particles[:,:,num_nodes_z-1]=h_r*number_of_particles
         new_number_of_particles[:,num_nodes_y-1,:]=psi_0[:,num_nodes_y-1,:]*number_of_particles
         
-        soil_moisture_content_diff=(soil_moisture_content0-soil_moisture_content)/L;
+        soil_moisture_content_diff=(soil_moisture_content0-soil_moisture_content)/L
         third_term_init=(r_z[:,:,1:num_nodes_z-1]-r_z[:,:,0:num_nodes_z-2])*dz + soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]
         flux_residual=third_term_init*number_of_particles
         
