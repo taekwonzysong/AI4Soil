@@ -177,8 +177,8 @@ def main():
     tol_iterations=np.zeros(iterations)
     psi_current=psi
     current_time=0
-    dt = 10
     while current_time<=Total_time:
+        dt=10 #dt=(np.power(dx,2)*maxr)/(2*np.max(Dx))
         current_time+=dt
         print("Solving for t = ",current_time)
         for iteration in range (0,iterations):
