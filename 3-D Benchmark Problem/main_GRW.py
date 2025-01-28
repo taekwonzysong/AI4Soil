@@ -93,9 +93,9 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             residual_coefficients=np.ones((num_nodes_x-2,num_nodes_y-2,num_nodes_z-2))
             residual_coefficients=1-(r_x[0:num_nodes_x-2,:,:]+r_x[1:num_nodes_x-1,:,:]+r_y[:,0:num_nodes_y-2,:]+r_y[:,1:num_nodes_y-1,:]+r_z[:,:,0:num_nodes_z-2]+r_z[:,:,1:num_nodes_z-1])
         
-        ########################################################################################    
-        # Calculate RHS: n^(s+1) 
-        ########################################################################################
+            ########################################################################################    
+            # Calculate RHS: n^(s+1) 
+            ########################################################################################
         
         
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=np.multiply(residual_coefficients,psi[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1])+\
@@ -118,9 +118,9 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             third_term_init=(r_z[:,:,1:num_nodes_z-1]-r_z[:,:,0:num_nodes_z-2])*dz + soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]
             flux_residual=third_term_init*number_of_particles
             
-        ######################################################################################
-        # Map n^(s+1) to psi^(s+1)
-        ######################################################################################
+            ######################################################################################
+            # Map n^(s+1) to psi^(s+1)
+            ######################################################################################
         
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]+flux_residual
             psi=new_number_of_particles/number_of_particles
@@ -128,9 +128,9 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             #psi=model.predict(psi1)[0]
             tol_iteration=np.linalg.norm(psi-psi_current)/np.linalg.norm(psi)
         
-        #######################################################################################    
-        # Condition of adaptive L-scheme
-        #######################################################################################
+            #######################################################################################    
+            # Condition of adaptive L-scheme
+            #######################################################################################
         
             if t_num*Total_time/3>=current_time and t_num*Total_time/3<current_time+dt and current_time<=Total_time: 
                 tol_iterations[iteration]=tol_iteration
@@ -140,8 +140,8 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
                 for num2 in range(0,num_nodes_y):
                     for num3 in range(0,num_nodes_z):
                         soil_moisture_content[num1,num2,num3]=theta(psi[num1,num2,num3],theta_r,theta_s,alpha)
-            current_time+=dt
-        return psi, new_number_of_particles
+        current_time+=dt
+    return psi, new_number_of_particles
 start_time = time.time()
 
 # Define parameters
@@ -236,9 +236,9 @@ while current_time<=Total_time:
         residual_coefficients=np.ones((num_nodes_x-2,num_nodes_y-2,num_nodes_z-2))
         residual_coefficients=1-(r_x[0:num_nodes_x-2,:,:]+r_x[1:num_nodes_x-1,:,:]+r_y[:,0:num_nodes_y-2,:]+r_y[:,1:num_nodes_y-1,:]+r_z[:,:,0:num_nodes_z-2]+r_z[:,:,1:num_nodes_z-1])
     
-    ########################################################################################    
-    # Calculate RHS: n^(s+1) 
-    ########################################################################################
+        ########################################################################################    
+        # Calculate RHS: n^(s+1) 
+        ########################################################################################
     
     
         new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=np.multiply(residual_coefficients,psi[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1])+\
@@ -261,9 +261,9 @@ while current_time<=Total_time:
         third_term_init=(r_z[:,:,1:num_nodes_z-1]-r_z[:,:,0:num_nodes_z-2])*dz + soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]
         flux_residual=third_term_init*number_of_particles
         
-    ######################################################################################
-    # Map n^(s+1) to psi^(s+1)
-    ######################################################################################
+        ######################################################################################
+        # Map n^(s+1) to psi^(s+1)
+        ######################################################################################
     
         new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]+flux_residual
         psi=new_number_of_particles/number_of_particles
@@ -271,9 +271,9 @@ while current_time<=Total_time:
         #psi=model.predict(psi1)[0]
         tol_iteration=np.linalg.norm(psi-psi_current)/np.linalg.norm(psi)
     
-    #######################################################################################    
-    # Condition of adaptive L-scheme
-    #######################################################################################
+        #######################################################################################    
+        # Condition of adaptive L-scheme
+        #######################################################################################
     
         if t_num*Total_time/3>=current_time and t_num*Total_time/3<current_time+dt and current_time<=Total_time: 
             tol_iterations[iteration]=tol_iteration
@@ -283,7 +283,7 @@ while current_time<=Total_time:
             for num2 in range(0,num_nodes_y):
                 for num3 in range(0,num_nodes_z):
                     soil_moisture_content[num1,num2,num3]=theta(psi[num1,num2,num3],theta_r,theta_s,alpha)
-        current_time+=dt
+    current_time+=dt
 end_time = time.time()
 print("Total execution time:", end_time - start_time)
     

@@ -25,9 +25,9 @@ Under the 1-D Benchmark Problem folder:
 - GRW_solver.ipynb: a visualization of GRW results presented in Figure 5 of our manuscript
 - DRW_solver.ipynb: a visualization of DRW results presented in Figure 5 of our manuscript
 - Data/ground_truth_solutions.csv: "ground truth" solutions of Celia's problem obtained from finite difference method implemented in [SimPEG](https://simpegdocs.appspot.com/content/examples/20-published/plot_richards_celia1990.html)
-- Data/reference_solutions_1-D_1.csv: reference solutions after performing data augmentation and will be used for neural network training for the particular instance discussed in our manuscript
-- Data/reference_solutions_original.csv: original reference solutions for the particular instance discussed in our manuscript
-- Data/reference_solutions_original_selected.csv: stores GRW solutions in Figure 2 for the particular instance discussed in our manuscript. The solutions are randomly selected from reference_solutions_original.csv
+- Data/reference_solutions_1-D_1.csv: reference solutions (after data augmentation) saved for the particular instance discussed in our manuscript, will be used for neural network training.
+- Data/reference_solutions_original.csv: original reference solutions saved for the particular instance discussed in our manuscript.
+- Data/reference_solutions_original_selected.csv: stores GRW solutions in Figure 2 for the particular instance discussed in our manuscript. The solutions are randomly selected from reference_solutions_original.csv as discussed in the manuscript.
 - Data/GRW_solutions_s1.csv: stores GRW solutions in Figure 5 (Scenario 1) for the particular instance discussed in our manuscript.
 - Data/GRW_solutions_s2.csv: stores GRW solutions in Figure 5 (Scenario 2) for the particular instance discussed in our manuscript.
  
@@ -38,16 +38,16 @@ Under the 2-D Benchmark Problem folder:
 - models.py: defines the neural network architectures
 - training.py: function to train the neural networks
 - data_processing.py: function to load the data
-- Data/reference_solutions_2-D.csv: reference solutions after performing data augmentation and will be used for neural network training saved for the particular instance discussed in our manuscript
+- Data/reference_solutions_2-D.csv: reference solutions (after data augmentation) saved for the particular instance discussed in our manuscript
  
 Under the 3-D Benchmark Problem folder:
-- main_GRW.py: main file for running the GRW algorithm
+- main_GRW.py: main file for running the GRW algorithm (the GRW code has been incorporated in the main_DRW.py file so this file is depreciated)
 - main_DRW.py: main file for running the DRW algorithm
 - matrix.py: functions to calculate the condition number and spetral radius of the coefficient matrix A
 - models.py: defines the neural network architectures
 - training.py: function to train the neural networks
 - data_processing.py: function to load the data
-- Data/reference_solutions_3-D.csv: reference solutions after performing data augmentation and will be used for neural network training saved for the particular instance discussed in our manuscript
+- Data/reference_solutions_3-D.csv: reference solutions (after data augmentation) saved for the particular instance discussed in our manuscript
  
 Under the Ref. [27] folder:
 - GRW_Ref_27.m: runs the in-house GRW algorithm (this needs to be run first) for Ref. [27] in our manuscript

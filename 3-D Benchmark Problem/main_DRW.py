@@ -101,9 +101,9 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             residual_coefficients=np.ones((num_nodes_x-2,num_nodes_y-2,num_nodes_z-2))
             residual_coefficients=1-(r_x[0:num_nodes_x-2,:,:]+r_x[1:num_nodes_x-1,:,:]+r_y[:,0:num_nodes_y-2,:]+r_y[:,1:num_nodes_y-1,:]+r_z[:,:,0:num_nodes_z-2]+r_z[:,:,1:num_nodes_z-1])
         
-        ########################################################################################    
-        # Calculate RHS: n^(s+1) 
-        ########################################################################################
+            ########################################################################################    
+            # Calculate RHS: n^(s+1) 
+            ########################################################################################
         
         
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=np.multiply(residual_coefficients,psi[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1])+\
@@ -126,9 +126,9 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             third_term_init=(r_z[:,:,1:num_nodes_z-1]-r_z[:,:,0:num_nodes_z-2])*dz + soil_moisture_content_diff[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]
             flux_residual=third_term_init*number_of_particles
             
-        ######################################################################################
-        # Map n^(s+1) to psi^(s+1)
-        ######################################################################################
+            ######################################################################################
+            # Map n^(s+1) to psi^(s+1)
+            ######################################################################################
         
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]+flux_residual
             psi=new_number_of_particles/number_of_particles
@@ -136,9 +136,9 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
             #psi=model.predict(psi1)[0]
             tol_iteration=np.linalg.norm(psi-psi_current)/np.linalg.norm(psi)
         
-        #######################################################################################    
-        # Condition of adaptive L-scheme
-        #######################################################################################
+            #######################################################################################    
+            # Condition of adaptive L-scheme
+            #######################################################################################
         
             if t_num*Total_time/3>=current_time and t_num*Total_time/3<current_time+dt and current_time<=Total_time: 
                 tol_iterations[iteration]=tol_iteration
@@ -148,8 +148,8 @@ def GRW_solver(L_value,num_nodes_x,num_nodes_y,num_nodes_z,iterations):
                 for num2 in range(0,num_nodes_y):
                     for num3 in range(0,num_nodes_z):
                         soil_moisture_content[num1,num2,num3]=theta(psi[num1,num2,num3],theta_r,theta_s,alpha)
-            current_time+=dt
-        return psi, new_number_of_particles
+        current_time+=dt
+    return psi, new_number_of_particles
 def main():
     start_time = time.time()
     index = 1
@@ -254,7 +254,7 @@ def main():
     
     print("NN training...")
     # Train models
-    epoch = 2
+    epoch = 1000
     mlp_loss1 = train_model(mlp1, mlp_optimizer1, x, y, epoch)
     mlp_loss2 = train_model(mlp2, mlp_optimizer2, y, x, epoch)
     mlp_loss3 = train_model(mlp3, mlp_optimizer3, v, w, epoch)
@@ -366,9 +366,9 @@ def main():
             residual_coefficients=np.ones((num_nodes_x-2,num_nodes_y-2,num_nodes_z-2))
             residual_coefficients=1-(r_x[0:num_nodes_x-2,:,:]+r_x[1:num_nodes_x-1,:,:]+r_y[:,0:num_nodes_y-2,:]+r_y[:,1:num_nodes_y-1,:]+r_z[:,:,0:num_nodes_z-2]+r_z[:,:,1:num_nodes_z-1])
         
-        ########################################################################################    
-        # Calculate RHS: n^(s+1) 
-        ########################################################################################
+            ########################################################################################    
+            # Calculate RHS: n^(s+1) 
+            ########################################################################################
         
         
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=np.multiply(residual_coefficients,psi[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1])+\
@@ -401,9 +401,9 @@ def main():
             third_term_init=third_term_init.detach().numpy()
             third_term_init=np.reshape(third_term_init,(num_nodes_x-2,num_nodes_y-2,num_nodes_z-2))
             
-        ######################################################################################
-        # Map n^(s+1) to psi^(s+1) by neural network
-        ######################################################################################
+            ######################################################################################
+            # Map n^(s+1) to psi^(s+1) by neural network
+            ######################################################################################
         
             new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]=new_number_of_particles[1:num_nodes_x-1,1:num_nodes_y-1,1:num_nodes_z-1]+flux_residual
             n1=new_number_of_particles
@@ -424,9 +424,9 @@ def main():
             #psi=model.predict(psi1)[0]
             tol_iteration=np.linalg.norm(psi-psi_current)/np.linalg.norm(psi)
         
-        #######################################################################################    
-        # Condition of adaptive L-scheme
-        #######################################################################################
+            #######################################################################################    
+            # Condition of adaptive L-scheme
+            #######################################################################################
         
             if abs(calculate_K(K_s,alpha,psi_0[0,0,0])*2/L[0,0,0]-1/(abs((1/(1e-2*psi[0,0,num_nodes_z-2]))*g[0,0,num_nodes_z-2]))*(calculate_K(K_s,alpha,psi[0,0,num_nodes_z-2])+calculate_K(K_s,alpha,psi[0,0,num_nodes_z-3])+h[0,0,num_nodes_z-2]))>1e-2*dt/dz**2 and iteration>1:
                 current_iteration=iteration
@@ -448,9 +448,9 @@ def main():
                 for num2 in range(0,num_nodes_y):
                     for num3 in range(0,num_nodes_z):
                         soil_moisture_content[num1,num2,num3]=theta(psi[num1,num2,num3],theta_r,theta_s,alpha)
-            current_time+=dt
-        end_time = time.time()
-        print("Solution process complete. Total CPU time:", end_time - start_time)
+        current_time+=dt
+    end_time = time.time()
+    print("Solution process complete. Total CPU time:", end_time - start_time)
     
 if __name__ == "__main__":
     main()
